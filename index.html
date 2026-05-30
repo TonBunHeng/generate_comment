@@ -1,551 +1,162 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>TokComment — Comment Generator</title>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet"/>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<style>
-:root{
-  --bg:#0a0a12;--surface:#101018;--surface2:#18181f;--surface3:#22222c;
-  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);
-  --text:#f0f0f0;--text2:#888;--muted:#444;
-  --tt:#fe2c55;--tt2:#25f4ee;
-  --fb:#1877f2;--yt:#ff0000;--ig:#e1306c;--tw:#1d9bf0;
-  --sidebar-w:320px;
-}
-body.light-mode{
-  --bg:#f2f2f7;--surface:#ffffff;--surface2:#ebebf0;--surface3:#dddde5;
-  --border:rgba(0,0,0,0.08);--border2:rgba(0,0,0,0.14);
-  --text:#111118;--text2:#555560;--muted:#ababbc;
-}
-body.light-mode header{background:rgba(242,242,247,0.96);box-shadow:0 1px 0 var(--border);}
-body.light-mode .preview-area::before{background-image:linear-gradient(rgba(0,0,0,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(0,0,0,0.04) 1px,transparent 1px);}
-body.light-mode .preview-area::after{background:radial-gradient(ellipse at 60% 30%,rgba(254,44,85,0.07),transparent 55%),radial-gradient(ellipse at 20% 75%,rgba(37,244,238,0.06),transparent 50%);}
-body{transition:background .3s,color .25s;}
-header,aside,nav a,.ptab,.inp,.av-zone,.btn-rand,.btn-dl-sec,.tog,.div,.sec-label,.sidebar,.sb,.field,.preview-area,.dark-btn{transition:background-color .25s,border-color .25s,color .2s,box-shadow .2s;}
-.tog::after{transition:transform .2s!important;}
-
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
-
-header{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:0 24px;height:54px;
-  background:rgba(10,10,18,0.96);border-bottom:1px solid var(--border);
-  position:sticky;top:0;z-index:100;backdrop-filter:blur(16px);
-}
-.logo{display:flex;align-items:center;gap:9px;text-decoration:none;}
-.logo-mark{width:30px;height:30px;border-radius:7px;background:linear-gradient(135deg,var(--tt),var(--tt2));display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:900;color:#fff;box-shadow:0 0 14px rgba(254,44,85,0.45);}
-.logo-name{font-size:17px;font-weight:700;color:#fff;letter-spacing:-0.4px;}
-.logo-name em{font-style:normal;color:var(--tt);}
-nav{display:flex;gap:2px;}
-nav a{color:var(--text2);text-decoration:none;font-size:13px;padding:6px 12px;border-radius:6px;transition:all .18s;font-weight:500;}
-nav a:hover{color:#fff;background:var(--surface2);}
-.h-right{display:flex;align-items:center;gap:8px;}
-.dark-btn{width:34px;height:34px;border-radius:50%;background:var(--surface2);border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;color:var(--text2);transition:all .18s;}
-.dark-btn:hover{color:#fff;}
-.btn-pro{font-size:12px;font-weight:700;background:linear-gradient(90deg,var(--tt2),var(--tt));color:#000;padding:7px 16px;border-radius:8px;border:none;cursor:pointer;transition:transform .14s,box-shadow .14s;box-shadow:0 0 18px rgba(254,44,85,0.3);}
-.btn-pro:hover{transform:translateY(-1px);box-shadow:0 4px 22px rgba(254,44,85,0.45);}
-.menu-btn{display:none;width:34px;height:34px;border:1px solid var(--border2);border-radius:7px;background:var(--surface2);color:#fff;align-items:center;justify-content:center;cursor:pointer;font-size:14px;}
-
-.ptabs{display:flex;padding:0 24px;background:var(--surface);border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:none;}
-.ptabs::-webkit-scrollbar{display:none;}
-.ptab{display:flex;align-items:center;gap:7px;padding:12px 18px;font-size:13px;font-weight:500;color:var(--text2);cursor:pointer;border-bottom:2px solid transparent;transition:all .18s;white-space:nowrap;flex-shrink:0;}
-.ptab:hover{color:#fff;}
-.ptab.active{color:#fff;border-bottom-color:var(--tt);}
-.ptab[data-p="facebook"].active{border-bottom-color:var(--fb);color:var(--fb);}
-.ptab[data-p="youtube"].active{border-bottom-color:var(--yt);color:var(--yt);}
-.ptab[data-p="instagram"].active{border-bottom-color:var(--ig);color:var(--ig);}
-.ptab[data-p="twitter"].active{border-bottom-color:var(--tw);color:var(--tw);}
-
-.layout{display:flex;height:calc(100vh - 54px - 44px);}
-
-/* SIDEBAR */
-.sidebar{width:var(--sidebar-w);flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);overflow-y:auto;transition:transform .3s cubic-bezier(.4,0,.2,1);}
-.sidebar::-webkit-scrollbar{width:3px;}
-.sidebar::-webkit-scrollbar-thumb{background:var(--surface3);border-radius:4px;}
-.sb{padding:18px 16px;display:flex;flex-direction:column;gap:14px;}
-.sec-label{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);font-family:'IBM Plex Mono',monospace;padding-bottom:8px;border-bottom:1px solid var(--border);}
-.field{display:flex;flex-direction:column;gap:5px;}
-.fl{font-size:11px;font-weight:600;color:var(--text2);letter-spacing:0.3px;}
-.av-zone{border:1.5px dashed var(--border2);border-radius:10px;display:flex;align-items:center;gap:11px;padding:9px 13px;cursor:pointer;background:var(--surface2);transition:all .2s;position:relative;overflow:hidden;}
-.av-zone:hover{border-color:var(--tt);background:rgba(254,44,85,0.05);}
-.av-zone input{position:absolute;inset:0;opacity:0;cursor:pointer;}
-.av-zone img{width:38px;height:38px;border-radius:50%;object-fit:cover;border:2px solid var(--tt);flex-shrink:0;}
-.av-zone-txt{font-size:12px;color:var(--text2);}
-.av-zone-txt strong{display:block;font-size:13px;color:var(--text);margin-bottom:1px;}
-.btn-rand{padding:8px;border:1px solid var(--border2);border-radius:8px;background:var(--surface2);color:var(--text2);font-family:'IBM Plex Sans',sans-serif;font-size:12px;font-weight:500;cursor:pointer;transition:all .18s;display:flex;align-items:center;justify-content:center;gap:6px;}
-.btn-rand:hover{border-color:var(--tt2);color:var(--tt2);}
-.inp{width:100%;padding:9px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'IBM Plex Sans',sans-serif;font-size:13.5px;outline:none;resize:none;transition:border-color .18s,box-shadow .18s;}
-.inp::placeholder{color:var(--muted);}
-.inp:focus{border-color:var(--tt);box-shadow:0 0 0 2px rgba(254,44,85,0.12);}
-textarea.inp{height:76px;line-height:1.55;}
-.row2{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
-.tog-row{display:flex;align-items:center;justify-content:space-between;}
-.tog-label{font-size:13px;color:var(--text);display:flex;align-items:center;gap:7px;}
-.tog-label i{color:var(--text2);font-size:12px;}
-.tog{width:38px;height:21px;border-radius:11px;background:var(--surface3);border:1px solid var(--border2);position:relative;cursor:pointer;transition:background .2s;flex-shrink:0;}
-.tog.on{background:var(--tt);border-color:var(--tt);}
-.tog::after{content:'';position:absolute;top:2px;left:2px;width:15px;height:15px;border-radius:50%;background:#fff;transition:transform .2s;box-shadow:0 1px 4px rgba(0,0,0,.3);}
-.tog.on::after{transform:translateX(17px);}
-.div{height:1px;background:var(--border);}
-.btn-dl-main{width:100%;padding:11px;background:linear-gradient(90deg,var(--tt),#ff6b35);border:none;border-radius:9px;font-family:'IBM Plex Sans',sans-serif;font-size:13px;font-weight:700;color:#fff;cursor:pointer;transition:transform .14s,box-shadow .14s;box-shadow:0 4px 18px rgba(254,44,85,0.35);display:flex;align-items:center;justify-content:center;gap:8px;}
-.btn-dl-main:hover{transform:translateY(-1px);box-shadow:0 6px 26px rgba(254,44,85,0.5);}
-.btn-dl-sec{width:100%;padding:9px;border:1px solid var(--border2);border-radius:9px;background:transparent;color:var(--text);font-family:'IBM Plex Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all .18s;display:flex;align-items:center;justify-content:center;gap:7px;}
-.btn-dl-sec:hover{border-color:var(--tt2);color:var(--tt2);}
-
-/* PREVIEW */
-.preview-area{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px 24px;gap:18px;overflow:auto;position:relative;}
-.preview-area::before{content:'';position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,0.018) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.018) 1px,transparent 1px);background-size:30px 30px;pointer-events:none;}
-.preview-area::after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 60% 30%,rgba(254,44,85,0.05),transparent 55%),radial-gradient(ellipse at 20% 75%,rgba(37,244,238,0.04),transparent 50%);pointer-events:none;}
-.preview-label{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:10px;font-family:'IBM Plex Mono',monospace;position:relative;z-index:1;}
-.preview-label::before,.preview-label::after{content:'';width:30px;height:1px;background:var(--border2);}
-
-/* EXPORT WRAPPER */
-#exportTarget{position:relative;z-index:1;display:inline-block;max-width:100%;}
-
-/* ══ TIKTOK SPEECH BUBBLE CARD ══ */
-.tt-wrap{
-  background:#0a0a12;
-  padding:48px 36px 64px;
-  border-radius:20px;
-  min-width:320px;max-width:500px;
-  position:relative;
-}
-.tt-wrap.light{background:#f0f0f5;}
-
-.tt-bubble{
-  background:#fff;
-  border-radius:20px 20px 20px 6px;
-  padding:20px 22px 22px;
-  position:relative;
-  box-shadow:0 12px 48px rgba(0,0,0,0.4),0 2px 8px rgba(0,0,0,0.2);
-  display:flex;gap:16px;align-items:flex-start;
-}
-/* speech tail */
-.tt-bubble::after{
-  content:'';position:absolute;
-  bottom:-26px;left:24px;
-  width:0;height:0;
-  border-left:14px solid transparent;
-  border-right:8px solid transparent;
-  border-top:28px solid #fff;
-}
-.tt-av{
-  width:54px;height:54px;border-radius:50%;
-  object-fit:cover;flex-shrink:0;
-  background:#ddd;border:2.5px solid #f0f0f0;
-}
-.tt-body{flex:1;min-width:0;}
-.tt-reply-label{
-  font-size:14px;font-weight:400;color:#888;
-  margin-bottom:5px;
-  font-family:-apple-system,'Segoe UI',sans-serif;
-}
-.tt-text{
-  font-size:28px;font-weight:800;line-height:1.28;
-  color:#111;
-  font-family:-apple-system,'Helvetica Neue','Segoe UI',sans-serif;
-  word-break:break-word;white-space:pre-wrap;
-  letter-spacing:-0.3px;
-}
-.tt-user-row{display:flex;align-items:center;gap:5px;margin-top:8px;}
-.tt-user{font-size:13px;color:#666;font-family:-apple-system,sans-serif;}
-.tt-vtick{color:#20d5ec;font-size:13px;display:none;}
-.tt-vtick.show{display:inline;}
-
-/* dark bubble */
-.tt-wrap.dark-bubble .tt-bubble{background:#1e1e2a;box-shadow:0 12px 48px rgba(0,0,0,0.6);}
-.tt-wrap.dark-bubble .tt-bubble::after{border-top-color:#1e1e2a;}
-.tt-wrap.dark-bubble .tt-text{color:#ffffff;}
-.tt-wrap.dark-bubble .tt-reply-label{color:#777;}
-.tt-wrap.dark-bubble .tt-user{color:#999;}
-
-/* ══ FACEBOOK ══ */
-.fb-card{background:#fff;font-family:-apple-system,'Segoe UI',sans-serif;padding:16px;border-radius:12px;box-shadow:0 4px 24px rgba(0,0,0,0.3);min-width:300px;max-width:480px;width:100%;}
-.fb-row{display:flex;gap:8px;align-items:flex-start;}
-.fb-av{width:40px;height:40px;border-radius:50%;object-fit:cover;flex-shrink:0;background:#ddd;}
-.fb-right{flex:1;min-width:0;}
-.fb-bubble{background:#f0f2f5;border-radius:18px;padding:9px 14px;position:relative;}
-.fb-name-row{display:flex;align-items:center;gap:4px;margin-bottom:3px;}
-.fb-name{font-size:13.5px;font-weight:700;color:#050505;}
-.fb-vtick{font-size:12px;display:none;}
-.fb-vtick.show{display:inline;color:#1877f2;}
-.fb-text{font-size:14px;color:#1c1e21;line-height:1.45;white-space:pre-wrap;word-break:break-word;}
-.fb-react{display:inline-flex;align-items:center;gap:3px;background:#fff;border-radius:20px;padding:2px 8px;box-shadow:0 1px 4px rgba(0,0,0,.15);font-size:12px;margin-top:4px;}
-.fb-meta{display:flex;align-items:center;gap:14px;margin-top:6px;padding-left:4px;}
-.fb-meta span{font-size:12px;font-weight:700;color:#65676b;cursor:pointer;}
-.fb-meta .active{color:#1877f2;}
-.fb-meta .t{font-weight:400!important;}
-.fb-rep-wrap{margin-top:8px;display:flex;gap:8px;align-items:center;}
-.fb-rep-av{width:28px;height:28px;border-radius:50%;object-fit:cover;background:#ddd;}
-.fb-rep-bub{background:#f0f2f5;border-radius:18px;padding:7px 13px;font-size:13px;color:#050505;flex:1;}
-
-/* ══ YOUTUBE ══ */
-.yt-card{background:#fff;font-family:'Roboto','IBM Plex Sans',sans-serif;padding:16px 20px;box-shadow:0 4px 24px rgba(0,0,0,0.3);min-width:300px;max-width:560px;width:100%;}
-.yt-row{display:flex;gap:14px;}
-.yt-av{width:40px;height:40px;border-radius:50%;object-fit:cover;flex-shrink:0;background:#ddd;}
-.yt-body{flex:1;min-width:0;}
-.yt-meta{display:flex;align-items:center;gap:6px;margin-bottom:3px;}
-.yt-name{font-size:13px;font-weight:500;color:#0f0f0f;}
-.yt-vtick{color:#aaa;font-size:12px;display:none;}
-.yt-vtick.show{display:inline;}
-.yt-time{font-size:12px;color:#606060;}
-.yt-text{font-size:14px;line-height:1.55;color:#0f0f0f;white-space:pre-wrap;word-break:break-word;margin:4px 0 10px;}
-.yt-acts{display:flex;align-items:center;gap:2px;}
-.yt-btn{display:flex;align-items:center;gap:4px;padding:5px 8px;border-radius:20px;font-size:13px;color:#606060;cursor:pointer;transition:background .14s;}
-.yt-btn:hover{background:#f2f2f2;}
-.yt-btn.liked{color:#0f0f0f;}
-.yt-rep{margin-top:12px;padding:10px;background:#f9f9f9;border-left:3px solid #ddd;font-size:13px;color:#0f0f0f;}
-
-/* ══ INSTAGRAM ══ */
-.ig-card{background:#fff;font-family:-apple-system,'Segoe UI',sans-serif;padding:14px 16px;box-shadow:0 4px 24px rgba(0,0,0,0.3);min-width:300px;max-width:480px;width:100%;}
-.ig-row{display:flex;gap:10px;align-items:flex-start;}
-.ig-av{width:34px;height:34px;border-radius:50%;object-fit:cover;flex-shrink:0;background:#ddd;border:2px solid transparent;background-clip:padding-box;box-shadow:0 0 0 2px #e1306c;}
-.ig-body{flex:1;}
-.ig-line{font-size:14px;color:#262626;line-height:1.5;white-space:pre-wrap;word-break:break-word;}
-.ig-un{font-weight:700;margin-right:5px;}
-.ig-vtick{font-size:11px;display:none;margin-right:3px;}
-.ig-vtick.show{display:inline;color:#1877f2;}
-.ig-meta{display:flex;align-items:center;gap:12px;margin-top:4px;}
-.ig-time{font-size:12px;color:#8e8e8e;}
-.ig-rep-btn{font-size:12px;font-weight:600;color:#8e8e8e;cursor:pointer;}
-.ig-heart{color:#262626;font-size:14px;cursor:pointer;margin-left:auto;}
-.ig-heart.liked{color:#ed4956;}
-.ig-rep{margin-top:8px;font-size:13px;color:#8e8e8e;}
-.ig-rep strong{color:#262626;font-weight:600;}
-
-/* ══ TWITTER ══ */
-.tw-card{background:#fff;font-family:-apple-system,'Segoe UI',sans-serif;padding:14px 16px;box-shadow:0 4px 24px rgba(0,0,0,0.3);border-bottom:1px solid #eff3f4;min-width:300px;max-width:520px;width:100%;}
-.tw-row{display:flex;gap:12px;}
-.tw-av{width:40px;height:40px;border-radius:50%;object-fit:cover;flex-shrink:0;background:#ddd;}
-.tw-body{flex:1;min-width:0;}
-.tw-top{display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin-bottom:2px;}
-.tw-name{font-size:15px;font-weight:700;color:#0f1419;}
-.tw-vtick{font-size:14px;display:none;}
-.tw-vtick.show{display:inline;color:#1d9bf0;}
-.tw-handle,.tw-dot,.tw-time{font-size:14px;color:#536471;}
-.tw-text{font-size:15px;line-height:1.55;color:#0f1419;white-space:pre-wrap;word-break:break-word;margin:4px 0 10px;}
-.tw-acts{display:flex;align-items:center;gap:20px;}
-.tw-act{display:flex;align-items:center;gap:5px;font-size:13px;color:#536471;cursor:pointer;transition:color .14s;}
-.tw-act:hover{color:#1d9bf0;}
-.tw-act.liked{color:#f91880;}
-.tw-act.rt:hover{color:#00ba7c;}
-.tw-act i{font-size:16px;}
-.tw-rep{margin-top:10px;padding:10px 14px;border:1px solid #eff3f4;border-radius:12px;font-size:13px;color:#536471;}
-
-/* TOAST */
-.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(16px);background:#1a1a22;border:1px solid var(--border2);color:#fff;padding:10px 18px;border-radius:10px;font-size:13px;font-weight:500;box-shadow:0 8px 32px rgba(0,0,0,.4);opacity:0;pointer-events:none;transition:all .28s cubic-bezier(.34,1.56,.64,1);z-index:9999;display:flex;align-items:center;gap:8px;}
-.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
-.toast i{color:var(--tt2);}
-.overlay{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);}
-.overlay.open{display:block;}
-
-@media(max-width:768px){
-  nav{display:none;}
-  .menu-btn{display:flex;}
-  .ptabs{padding:0 12px;}
-  .ptab{padding:11px 14px;}
-  .layout{flex-direction:column;height:auto;min-height:calc(100vh - 54px - 44px);}
-  .sidebar{position:fixed;left:0;top:98px;height:calc(100vh - 98px);z-index:300;transform:translateX(-110%);width:min(var(--sidebar-w),92vw);box-shadow:4px 0 32px rgba(0,0,0,.5);}
-  .sidebar.open{transform:translateX(0);}
-  .preview-area{padding:20px 14px;min-height:60vh;}
-  .tt-wrap{padding:32px 20px 52px;min-width:0;width:100%;}
-  .tt-text{font-size:20px;}
-}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>TokComment</title>
+  
+  <link rel="icon" type="image/x-icon" href="./imgs/comment.png">
+  
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<div class="toast" id="toast"><i class="fa fa-check"></i><span id="toastMsg">Done!</span></div>
-<div class="overlay" id="overlay" onclick="closeSb()"></div>
-
-<header>
-  <a class="logo" href="#">
-    <div class="logo-mark">T</div>
-    <div class="logo-name">Tok<em>Comment</em></div>
-  </a>
-  <nav>
-    <a href="#">TikTok</a><a href="#">Facebook</a>
-    <a href="#">YouTube</a><a href="#">More</a>
-  </nav>
-  <div class="h-right">
-    <div class="dark-btn" id="themeBtn" onclick="toggleTheme()" title="Toggle Light/Dark Mode"><i id="themeIcon" class="fa fa-moon"></i></div>
-    <button class="btn-pro" onclick="exportPNG()">⬇ Download PNG</button>
-    <button class="menu-btn" onclick="toggleSb()"><i class="fa fa-sliders"></i></button>
-  </div>
-</header>
-
-<div class="ptabs">
-  <div class="ptab active" data-p="tiktok"    onclick="switchP(this)"><i class="fa-brands fa-tiktok"></i> TikTok</div>
-  <div class="ptab"        data-p="facebook"  onclick="switchP(this)"><i class="fa-brands fa-facebook"></i> Facebook</div>
-  <div class="ptab"        data-p="youtube"   onclick="switchP(this)"><i class="fa-brands fa-youtube"></i> YouTube</div>
-  <div class="ptab"        data-p="instagram" onclick="switchP(this)"><i class="fa-brands fa-instagram"></i> Instagram</div>
-  <div class="ptab"        data-p="twitter"   onclick="switchP(this)"><i class="fa-brands fa-x-twitter"></i> X / Twitter</div>
-</div>
-
-<div class="layout">
-  <aside class="sidebar" id="sidebar">
-    <div class="sb">
-      <div class="sec-label">Profile</div>
-      <div class="field">
-        <div class="fl">Avatar</div>
-        <label class="av-zone">
-          <input type="file" id="avatarInput" accept="image/*" onchange="loadAv(event)"/>
-          <img id="avThumb" src="https://i.pravatar.cc/200?img=12" crossorigin="anonymous"/>
-          <div class="av-zone-txt"><strong>Upload Photo</strong><span style="font-size:11px;display:block;">PNG / JPG · max 5MB</span></div>
-        </label>
-        <button class="btn-rand" onclick="randAv()"><i class="fa fa-shuffle"></i> Random Avatar</button>
+  <div id="loadingOverlay">
+    <div class="loader-container">
+      <div class="tok-spinner">
+        <i class="fa-regular fa-comment-dots spinner-icon"></i>
       </div>
-      <div class="field">
-        <div class="fl">Display Name</div>
-        <input class="inp" id="displayName" value="User Official" placeholder="Display name" oninput="render()"/>
+      <div class="loading-title">TokComment</div>
+      <div class="loading-desc">crafting immersive comments</div>
+      <div class="progress-bar-bg">
+        <div class="progress-fill" id="progressFill"></div>
       </div>
-      <div class="field">
-        <div class="fl">Username / Handle</div>
-        <input class="inp" id="username" value="user.official" placeholder="@username" oninput="render()"/>
-      </div>
-
-      <div class="div"></div>
-      <div class="sec-label">Comment</div>
-      <div class="field">
-        <div class="fl">Comment Text</div>
-        <textarea class="inp" id="commentText" oninput="render()">Write any comment and see what happens 😊</textarea>
-      </div>
-      <div class="row2">
-        <div class="field"><div class="fl">Time ago</div><input class="inp" id="timeAgo" value="2h" oninput="render()"/></div>
-        <div class="field"><div class="fl">Reply to (name)</div><input class="inp" id="replyLabel" value="User Official" oninput="render()"/></div>
-      </div>
-
-      <div class="div"></div>
-      <div class="sec-label">Options</div>
-      <div class="tog-row"><div class="tog-label"><i class="fa fa-circle-check"></i> Verified Badge</div><div class="tog on" id="togV" onclick="togOpt(this,'verified')"></div></div>
-      <div class="tog-row"><div class="tog-label"><i class="fa fa-heart"></i> Show Likes</div><div class="tog on" id="togL" onclick="togOpt(this,'likes')"></div></div>
-      <div class="tog-row"><div class="tog-label"><i class="fa fa-reply"></i> Show Reply</div><div class="tog" id="togR" onclick="togOpt(this,'reply')"></div></div>
-      <div class="field" id="repField" style="display:none;">
-        <div class="fl">Reply Text</div>
-        <textarea class="inp" id="replyTxt" style="height:60px;" oninput="render()">Great video! 🔥</textarea>
-      </div>
-
-      <div class="div"></div>
-      <div class="sec-label">Stats</div>
-      <div class="row2">
-        <div class="field"><div class="fl">Likes</div><input class="inp" id="likeCount" value="12.4K" oninput="render()"/></div>
-        <div class="field"><div class="fl">Replies</div><input class="inp" id="replyCount" value="847" oninput="render()"/></div>
-      </div>
-
-      <div class="div"></div>
-      <button class="btn-dl-main" onclick="exportPNG()"><i class="fa fa-image"></i> Download PNG</button>
-      <button class="btn-dl-sec"  onclick="exportJPG()"><i class="fa fa-file-image"></i> Export JPG</button>
-    </div>
-  </aside>
-
-  <main class="preview-area">
-    <div class="preview-label">Live Preview</div>
-    <div id="exportTarget"></div>
-    <div class="preview-label">Copyright by BunHeng and Chhaly</div>
-  </main>
-</div>
-
-<script>
-const S={
-  platform:'tiktok',darkBubble:false,
-  avatar:'https://i.pravatar.cc/200?img=12',
-  username:'user.official',
-  displayName:'User Official',
-  comment:'Write any comment and see what happens 😊',
-  replyLabel:'User Official',time:'2h',
-  verified:true,showLikes:true,showReply:false,
-  replyTxt:'Great video! 🔥',
-  likes:'12.4K',replies:'847',liked:false,
-};
-
-const AVS=[12,15,25,33,36,44,47,52,60,65,70,75,83,91];
-function randAv(){
-  const i=AVS[Math.floor(Math.random()*AVS.length)];
-  S.avatar=`https://i.pravatar.cc/200?img=${i}`;
-  document.getElementById('avThumb').src=S.avatar;
-  render();
-}
-function loadAv(e){
-  const f=e.target.files[0];if(!f)return;
-  const r=new FileReader();
-  r.onload=ev=>{S.avatar=ev.target.result;document.getElementById('avThumb').src=ev.target.result;render();};
-  r.readAsDataURL(f);
-}
-function togOpt(el,k){
-  el.classList.toggle('on');
-  const v=el.classList.contains('on');
-  if(k==='verified')S.verified=v;
-  if(k==='likes')S.showLikes=v;
-  if(k==='reply'){S.showReply=v;const f=document.getElementById('repField');f.style.display=v?'flex':'none';f.style.flexDirection='column';f.style.gap='5px';}
-  render();
-}
-function toggleDark(){S.darkBubble=!S.darkBubble;render();}
-
-function readInputs(){
-  S.username=document.getElementById('username').value||'username';
-  S.displayName=document.getElementById('displayName').value||S.username;
-  S.comment=document.getElementById('commentText').value||'';
-  S.time=document.getElementById('timeAgo').value||'2h';
-  S.replyLabel=document.getElementById('replyLabel').value||'username';
-  S.likes=document.getElementById('likeCount').value||'0';
-  S.replies=document.getElementById('replyCount').value||'0';
-  S.replyTxt=document.getElementById('replyTxt').value||'';
-}
-function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
-
-/* ─── TIKTOK: speech bubble (matches tokcomment.com style) ─── */
-function buildTikTok(){
-  const dc=S.darkBubble?' dark-bubble':'';
-  return `<div class="tt-wrap${dc}">
-  <div class="tt-bubble">
-    <img class="tt-av" src="${S.avatar}" crossorigin="anonymous"/>
-    <div class="tt-body">
-      <div class="tt-reply-label">Reply to ${esc(S.replyLabel)}'s comment</div>
-      <div class="tt-text">${esc(S.comment)}</div>
-      <div class="tt-user-row">
-        <span class="tt-user" style="font-weight:600;">${esc(S.displayName)}</span>
-        <span class="tt-user" style="color:#aaa;font-size:12px;margin-left:2px;">@${esc(S.username)}</span>
-        <i class="fa fa-circle-check tt-vtick${S.verified?' show':''}" style="color:#20d5ec;"></i>
-      </div>
+      <div class="countdown-text" id="countdownDisplay">3.0 s</div>
     </div>
   </div>
-</div>`;}
 
-function buildFacebook(){return `<div class="fb-card">
-  <div class="fb-row">
-    <img class="fb-av" src="${S.avatar}" crossorigin="anonymous"/>
-    <div class="fb-right">
-      <div class="fb-bubble">
-        <div class="fb-name-row">
-          <span class="fb-name">${esc(S.displayName)}</span>
-          <i class="fa fa-circle-check fb-vtick${S.verified?' show':''}"></i>
+  <div id="mainApp">
+    <div class="toast" id="toast"><i class="fa fa-check"></i> <span id="toastMsg">Done!</span></div>
+    <div class="overlay" id="overlay" onclick="closeSb()"></div>
+    
+    <header>
+      <a class="logo" href="#">
+        <div class="logo-mark">
+          <img src="./imgs/comment.png" alt="comment" width="20">
         </div>
-        <div class="fb-text">${esc(S.comment)}</div>
+        <div class="logo-name">Tok<em>Comment</em></div>
+      </a>
+      <nav>
+        <a href="https://portfolio-heng-three.vercel.app/">About Me</a>
+        <a href="mailto:tonbunheng1122@gmail.com?subject=Portfolio Contact">Contact Me</a>
+      </nav>
+      <div class="h-right">
+        <div class="dark-btn" id="themeBtn" onclick="toggleTheme()" title="Toggle Light/Dark Mode">
+          <i id="themeIcon" class="fa fa-moon"></i>
+        </div>
+        <button class="btn-pro" onclick="exportPNG()">⬇ Download PNG</button>
+        <button class="menu-btn" onclick="toggleSb()"><i class="fa fa-sliders"></i></button>
       </div>
-      ${S.showLikes?`<div style="margin-top:4px;margin-left:4px;"><div class="fb-react">👍 ❤️ 😂 <span style="color:#65676b;margin-left:2px;">${esc(S.likes)}</span></div></div>`:''}
-      <div class="fb-meta" style="margin-top:${S.showLikes?'8px':'4px'}">
-        <span class="${S.liked?'active':''}">Like</span>
-        <span>Reply</span>
-        <span class="t">${esc(S.time)}</span>
-      </div>
-      ${S.showReply?`<div class="fb-rep-wrap"><img class="fb-rep-av" src="${S.avatar}" crossorigin="anonymous"/><div class="fb-rep-bub"><span style="font-weight:700;color:#050505;">${esc(S.displayName)}</span> ${esc(S.replyTxt)}</div></div>`:''}
+    </header>
+
+    <div class="ptabs">
+      <div class="ptab active" data-p="tiktok" onclick="switchP(this)"><i class="fa-brands fa-tiktok"></i> TikTok</div>
+      <div class="ptab" data-p="facebook" onclick="switchP(this)"><i class="fa-brands fa-facebook"></i> Facebook</div>
+      <div class="ptab" data-p="youtube" onclick="switchP(this)"><i class="fa-brands fa-youtube"></i> YouTube</div>
+      <div class="ptab" data-p="instagram" onclick="switchP(this)"><i class="fa-brands fa-instagram"></i> Instagram</div>
+      <div class="ptab" data-p="twitter" onclick="switchP(this)"><i class="fa-brands fa-x-twitter"></i> X / Twitter</div>
+    </div>
+
+    <div class="layout">
+      
+      <aside class="sidebar" id="sidebar">
+        <div class="sb">
+          
+          <div class="sec-label">Profile</div>
+          <div class="field">
+            <div class="fl">Avatar</div>
+            <label class="av-zone">
+              <input type="file" id="avatarInput" accept="image/*" onchange="loadAv(event)" />
+              <img id="avThumb" src="https://i.pravatar.cc/200?img=12" crossorigin="anonymous" />
+              <div class="av-zone-txt">
+                <strong>Upload Photo</strong>
+                <span style="font-size:11px; display:block;">PNG / JPG · max 5MB</span>
+              </div>
+            </label>
+            <button class="btn-rand" onclick="randAv()"><i class="fa fa-shuffle"></i> Random Avatar</button>
+          </div>
+          <div class="field">
+            <div class="fl">Display Name</div>
+            <input class="inp" id="displayName" value="User Official" placeholder="Display name" oninput="render()" />
+          </div>
+          <div class="field">
+            <div class="fl">Username / Handle</div>
+            <input class="inp" id="username" value="user.official" placeholder="@username" oninput="render()" />
+          </div>
+
+          <div class="div"></div>
+          
+          <div class="sec-label">Comment</div>
+          <div class="field">
+            <div class="fl">Comment Text</div>
+            <textarea class="inp" id="commentText" oninput="render()">Write any comment and see what happens 😊</textarea>
+          </div>
+          <div class="row2">
+            <div class="field">
+              <div class="fl">Time ago</div>
+              <input class="inp" id="timeAgo" value="2h" oninput="render()" />
+            </div>
+            <div class="field">
+              <div class="fl">Reply to (name)</div>
+              <input class="inp" id="replyLabel" value="User Official" oninput="render()" />
+            </div>
+          </div>
+
+          <div class="div"></div>
+          
+          <div class="sec-label">Options</div>
+          <div class="tog-row">
+            <div class="tog-label"><i class="fa fa-circle-check"></i> Verified Badge</div>
+            <div class="tog on" id="togV" onclick="togOpt(this,'verified')"></div>
+          </div>
+          <div class="tog-row">
+            <div class="tog-label"><i class="fa fa-heart"></i> Show Likes</div>
+            <div class="tog on" id="togL" onclick="togOpt(this,'likes')"></div>
+          </div>
+          <div class="tog-row">
+            <div class="tog-label"><i class="fa fa-reply"></i> Show Reply</div>
+            <div class="tog" id="togR" onclick="togOpt(this,'reply')"></div>
+          </div>
+          <div class="field" id="repField" style="display:none;">
+            <div class="fl">Reply Text</div>
+            <textarea class="inp" id="replyTxt" style="height:60px;" oninput="render()">Great video! 🔥</textarea>
+          </div>
+
+          <div class="div"></div>
+          
+          <div class="sec-label">Stats</div>
+          <div class="row2">
+            <div class="field">
+              <div class="fl">Likes</div>
+              <input class="inp" id="likeCount" value="12.4K" oninput="render()" />
+            </div>
+            <div class="field">
+              <div class="fl">Replies</div>
+              <input class="inp" id="replyCount" value="847" oninput="render()" />
+            </div>
+          </div>
+          
+          <div class="div"></div>
+          
+          <button class="btn-dl-main" onclick="exportPNG()"><i class="fa fa-image"></i> Download PNG</button>
+          <button class="btn-dl-sec" onclick="exportJPG()"><i class="fa fa-file-image"></i> Export JPG</button>
+        </div>
+      </aside>
+      
+      <main class="preview-area">
+        <div class="preview-label">Live Preview</div>
+        <div id="exportTarget"></div>
+        <div class="preview-label">Copyright by BunHengDev</div>
+      </main>
+      
     </div>
   </div>
-</div>`;}
 
-function buildYouTube(){return `<div class="yt-card">
-  <div class="yt-row">
-    <img class="yt-av" src="${S.avatar}" crossorigin="anonymous"/>
-    <div class="yt-body">
-      <div class="yt-meta">
-        <span class="yt-name">${esc(S.displayName)}</span>
-        ${S.verified?`<i class="fa fa-circle-check yt-vtick show"></i>`:''}
-        <span class="yt-time">${esc(S.time)}</span>
-      </div>
-      <div class="yt-text">${esc(S.comment)}</div>
-      ${S.showLikes?`<div class="yt-acts">
-        <div class="yt-btn${S.liked?' liked':''}" onclick="tgl()"><i class="fa${S.liked?'-solid':'-regular'} fa-thumbs-up" style="font-size:16px;"></i><span>${esc(S.likes)}</span></div>
-        <div class="yt-btn"><i class="fa-regular fa-thumbs-down" style="font-size:16px;"></i></div>
-        <div class="yt-btn" style="font-weight:500;color:#0f0f0f;">Reply</div>
-      </div>`:''}
-      ${S.showReply?`<div class="yt-rep">${esc(S.replyTxt)}</div>`:''}
-    </div>
-  </div>
-</div>`;}
-
-function buildInstagram(){return `<div class="ig-card">
-  <div class="ig-row">
-    <img class="ig-av" src="${S.avatar}" crossorigin="anonymous"/>
-    <div class="ig-body">
-      <div class="ig-line"><span class="ig-un">${esc(S.displayName)}</span><i class="fa fa-circle-check ig-vtick${S.verified?' show':''}"></i>${esc(S.comment)}</div>
-      <div class="ig-meta">
-        <span class="ig-time">${esc(S.time)}</span>
-        ${S.showLikes?`<span class="ig-rep-btn">${esc(S.likes)} likes</span>`:''}
-        <span class="ig-rep-btn">Reply</span>
-        <i class="fa${S.liked?'-solid':'-regular'} fa-heart ig-heart${S.liked?' liked':''}" onclick="tgl()"></i>
-      </div>
-      ${S.showReply?`<div class="ig-rep"><strong>${esc(S.displayName)}</strong> ${esc(S.replyTxt)}</div>`:''}
-    </div>
-  </div>
-</div>`;}
-
-function buildTwitter(){
-  const h=S.username.startsWith('@')?S.username:'@'+S.username;
-  return `<div class="tw-card">
-  <div class="tw-row">
-    <img class="tw-av" src="${S.avatar}" crossorigin="anonymous"/>
-    <div class="tw-body">
-      <div class="tw-top">
-        <span class="tw-name">${esc(S.displayName)}</span>
-        ${S.verified?`<i class="fa fa-circle-check tw-vtick show"></i>`:''}
-        <span class="tw-handle">${esc(h)}</span>
-        <span class="tw-dot">·</span>
-        <span class="tw-time">${esc(S.time)}</span>
-      </div>
-      <div class="tw-text">${esc(S.comment)}</div>
-      ${S.showLikes?`<div class="tw-acts">
-        <span class="tw-act"><i class="fa-regular fa-comment"></i> ${esc(S.replies)}</span>
-        <span class="tw-act rt"><i class="fa-solid fa-retweet"></i></span>
-        <span class="tw-act${S.liked?' liked':''}" onclick="tgl()"><i class="fa${S.liked?'-solid':'-regular'} fa-heart"></i> ${esc(S.likes)}</span>
-        <span class="tw-act"><i class="fa-solid fa-share-nodes"></i></span>
-      </div>`:''}
-      ${S.showReply?`<div class="tw-rep">${esc(S.replyTxt)}</div>`:''}
-    </div>
-  </div>
-</div>`;}
-
-function render(){
-  readInputs();
-  const map={tiktok:buildTikTok,facebook:buildFacebook,youtube:buildYouTube,instagram:buildInstagram,twitter:buildTwitter};
-  document.getElementById('exportTarget').innerHTML=(map[S.platform]||buildTikTok)();
-}
-function tgl(){S.liked=!S.liked;render();}
-
-function switchP(el){
-  document.querySelectorAll('.ptab').forEach(t=>t.classList.remove('active'));
-  el.classList.add('active');S.platform=el.dataset.p;render();closeSb();
-}
-
-function getBg(){return S.platform==='tiktok'?(S.darkBubble?'#0a0a12':'#0a0a12'):'#ffffff';}
-
-function exportPNG(){
-  const el=document.getElementById('exportTarget').firstElementChild;
-  if(!el)return;
-  html2canvas(el,{scale:3,useCORS:true,allowTaint:true,backgroundColor:getBg()}).then(c=>{
-    const a=document.createElement('a');a.download='tokcomment.png';a.href=c.toDataURL('image/png');a.click();
-    showToast('PNG downloaded!');
-  });
-}
-function exportJPG(){
-  const el=document.getElementById('exportTarget').firstElementChild;
-  if(!el)return;
-  html2canvas(el,{scale:3,useCORS:true,allowTaint:true,backgroundColor:getBg()}).then(c=>{
-    const a=document.createElement('a');a.download='tokcomment.jpg';a.href=c.toDataURL('image/jpeg',0.96);a.click();
-    showToast('JPG downloaded!');
-  });
-}
-function showToast(msg){const t=document.getElementById('toast');document.getElementById('toastMsg').textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
-function toggleSb(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('overlay').classList.toggle('open');}
-function closeSb(){document.getElementById('sidebar').classList.remove('open');document.getElementById('overlay').classList.remove('open');}
-
-
-  /* ── APP-WIDE THEME TOGGLE ── */
-  let appDark = true;
-  function toggleTheme(){
-    appDark = !appDark;
-    document.body.classList.toggle('light-mode', !appDark);
-    document.getElementById('themeIcon').className = appDark ? 'fa fa-moon' : 'fa fa-sun';
-    // sync TikTok bubble to theme automatically
-    S.darkBubble = appDark;
-    render();
-  }
-
-render();
-</script>
+  <script src="main.js"></script>
 </body>
 </html>

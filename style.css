@@ -1,0 +1,1362 @@
+/* ==========================================================================
+   1. VARIABLES & THEMES (:root)
+   ========================================================================== */
+:root {
+  --bg: #0a0a12;
+  --surface: #101018;
+  --surface2: #18181f;
+  --surface3: #22222c;
+  --border: rgba(255, 255, 255, 0.07);
+  --border2: rgba(255, 255, 255, 0.13);
+  --text: #f0f0f0;
+  --text2: #888;
+  --muted: #444;
+  --tt: #fe2c55;
+  --tt2: #25f4ee;
+  --fb: #1877f2;
+  --yt: #ff0000;
+  --ig: #e1306c;
+  --tw: #1d9bf0;
+  --sidebar-w: 320px;
+}
+
+body.light-mode {
+  --bg: #f2f2f7;
+  --surface: #ffffff;
+  --surface2: #ebebf0;
+  --surface3: #dddde5;
+  --border: rgba(0, 0, 0, 0.08);
+  --border2: rgba(0, 0, 0, 0.14);
+  --text: #111118;
+  --text2: #555560;
+  --muted: #ababbc;
+}
+
+/* ==========================================================================
+   2. GLOBAL STYLES & TRANSITIONS
+   ========================================================================== */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'IBM Plex Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+  transition: background .3s, color .25s;
+}
+
+header, aside, nav a, .ptab, .inp, .av-zone, .btn-rand, .btn-dl-sec, 
+.tog, .div, .sec-label, .sidebar, .sb, .field, .preview-area, .dark-btn {
+  transition: background-color .25s, border-color .25s, color .2s, box-shadow .2s;
+}
+
+.tog::after {
+  transition: transform .2s !important;
+}
+
+/* ==========================================================================
+   3. LOADING OVERLAY (FULLSCREEN SPLASH)
+   ========================================================================== */
+#loadingOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: #0a0a12;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  transition: opacity 0.6s cubic-bezier(0.2, 0.9, 0.4, 1.1), visibility 0.4s;
+  backdrop-filter: blur(0px);
+  font-family: 'IBM Plex Sans', sans-serif;
+}
+
+body.light-mode #loadingOverlay {
+  background: #f2f2f7;
+}
+
+.loader-container {
+  text-align: center;
+  max-width: 320px;
+  padding: 32px 24px;
+  border-radius: 36px;
+  background: rgba(16, 16, 24, 0.7);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(254, 44, 85, 0.2);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  animation: floatGlow 2.2s infinite ease-in-out;
+}
+
+body.light-mode .loader-container {
+  background: rgba(255, 255, 255, 0.85);
+  border-color: rgba(254, 44, 85, 0.3);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+}
+
+@keyframes floatGlow {
+  0% { transform: translateY(0px); box-shadow: 0 20px 40px rgba(0,0,0,0.2); }
+  50% { transform: translateY(-8px); box-shadow: 0 28px 48px rgba(254,44,85,0.25); }
+  100% { transform: translateY(0px); }
+}
+
+.tok-spinner {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 20px;
+  position: relative;
+}
+
+.tok-spinner::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #fe2c55, #25f4ee);
+  animation: spinPulse 1s infinite linear;
+  mask: radial-gradient(farthest-side, transparent calc(100% - 12px), #000 calc(100% - 8px));
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 12px), #000 calc(100% - 8px));
+}
+
+@keyframes spinPulse {
+  0% { transform: rotate(0deg) scale(0.95); opacity: 0.8; }
+  100% { transform: rotate(360deg) scale(1.05); opacity: 1; }
+}
+
+.spinner-icon {
+  font-size: 48px;
+  background: linear-gradient(135deg, #fe2c55, #25f4ee);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  animation: pulseHeart 1.2s infinite;
+}
+
+@keyframes pulseHeart {
+  0% { opacity: 0.5; transform: translate(-50%, -50%) scale(0.9); }
+  100% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+}
+
+.loading-title {
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  background: linear-gradient(120deg, #fe2c55, #25f4ee);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  margin-bottom: 12px;
+}
+
+.loading-desc {
+  color: #aaa;
+  font-size: 14px;
+  margin-top: 8px;
+  font-weight: 500;
+}
+
+body.light-mode .loading-desc { 
+  color: #4a4a55; 
+}
+
+.progress-bar-bg {
+  width: 220px;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 20px;
+  margin: 24px auto 16px;
+  overflow: hidden;
+}
+
+body.light-mode .progress-bar-bg { 
+  background: rgba(0, 0, 0, 0.1); 
+}
+
+.progress-fill {
+  width: 0%;
+  height: 100%;
+  background: linear-gradient(90deg, #fe2c55, #25f4ee);
+  border-radius: 20px;
+  transition: width 0.08s linear;
+}
+
+.countdown-text {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 14px;
+  color: #fe2c55;
+  font-weight: 600;
+  letter-spacing: 1px;
+}
+
+#mainApp {
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.45s ease, visibility 0s linear 0.45s;
+}
+
+#mainApp.app-visible {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.45s ease, visibility 0s linear 0s;
+}
+
+/* ==========================================================================
+   4. APP HEADER & NAVIGATION
+   ========================================================================== */
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  height: 54px;
+  background: rgba(10, 10, 18, 0.96);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  backdrop-filter: blur(16px);
+}
+
+body.light-mode header {
+  background: rgba(242, 242, 247, 0.96);
+  box-shadow: 0 1px 0 var(--border);
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  text-decoration: none;
+}
+
+.logo-mark {
+  width: 30px;
+  height: 30px;
+  border-radius: 7px;
+  background: linear-gradient(135deg, var(--tt), var(--tt2));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  font-weight: 900;
+  color: #fff;
+  box-shadow: 0 0 14px rgba(254, 44, 85, 0.45);
+}
+
+.logo-name {
+  font-size: 17px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: -0.4px;
+}
+
+.logo-name em {
+  font-style: normal;
+  color: var(--tt);
+}
+
+nav {
+  display: flex;
+  gap: 2px;
+}
+
+nav a {
+  color: var(--text2);
+  text-decoration: none;
+  font-size: 13px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  transition: all .18s;
+  font-weight: 500;
+}
+
+nav a:hover {
+  color: #fff;
+  background: var(--surface2);
+}
+
+.h-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dark-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--text2);
+  transition: all .18s;
+}
+
+.dark-btn:hover {
+  color: #fff;
+}
+
+.btn-pro {
+  font-size: 12px;
+  font-weight: 700;
+  background: linear-gradient(90deg, var(--tt2), var(--tt));
+  color: #000;
+  padding: 7px 16px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: transform .14s, box-shadow .14s;
+  box-shadow: 0 0 18px rgba(254, 44, 85, 0.3);
+}
+
+.btn-pro:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 22px rgba(254, 44, 85, 0.45);
+}
+
+.menu-btn {
+  display: none;
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--border2);
+  border-radius: 7px;
+  background: var(--surface2);
+  color: #fff;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+/* ==========================================================================
+   5. PLATFORM TABS
+   ========================================================================== */
+.ptabs {
+  display: flex;
+  padding: 0 24px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.ptabs::-webkit-scrollbar {
+  display: none;
+}
+
+.ptab {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 12px 18px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text2);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all .18s;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.ptab:hover {
+  color: #fff;
+}
+
+.ptab.active { color: #fff; border-bottom-color: var(--tt); }
+.ptab[data-p="facebook"].active { border-bottom-color: var(--fb); color: var(--fb); }
+.ptab[data-p="youtube"].active { border-bottom-color: var(--yt); color: var(--yt); }
+.ptab[data-p="instagram"].active { border-bottom-color: var(--ig); color: var(--ig); }
+.ptab[data-p="twitter"].active { border-bottom-color: var(--tw); color: var(--tw); }
+
+/* ==========================================================================
+   6. APP LAYOUT & SIDEBAR (CONTROLS)
+   ========================================================================== */
+.layout {
+  display: flex;
+  height: calc(100vh - 54px - 44px);
+}
+
+.sidebar {
+  width: var(--sidebar-w);
+  flex-shrink: 0;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  overflow-y: auto;
+  transition: transform .3s cubic-bezier(.4, 0, .2, 1);
+}
+
+.sidebar::-webkit-scrollbar {
+  width: 3px;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+  background: var(--surface3);
+  border-radius: 4px;
+}
+
+.sb {
+  padding: 18px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.sec-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-family: 'IBM Plex Mono', monospace;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.fl {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text2);
+  letter-spacing: 0.3px;
+}
+
+.av-zone {
+  border: 1.5px dashed var(--border2);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 9px 13px;
+  cursor: pointer;
+  background: var(--surface2);
+  transition: all .2s;
+  position: relative;
+  overflow: hidden;
+}
+
+.av-zone:hover {
+  border-color: var(--tt);
+  background: rgba(254, 44, 85, 0.05);
+}
+
+.av-zone input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.av-zone img {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--tt);
+  flex-shrink: 0;
+}
+
+.av-zone-txt {
+  font-size: 12px;
+  color: var(--text2);
+}
+
+.av-zone-txt strong {
+  display: block;
+  font-size: 13px;
+  color: var(--text);
+  margin-bottom: 1px;
+}
+
+.btn-rand {
+  padding: 8px;
+  border: 1px solid var(--border2);
+  border-radius: 8px;
+  background: var(--surface2);
+  color: var(--text2);
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all .18s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.btn-rand:hover {
+  border-color: var(--tt2);
+  color: var(--tt2);
+}
+
+.inp {
+  width: 100%;
+  padding: 9px 12px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 13.5px;
+  outline: none;
+  resize: none;
+  transition: border-color .18s, box-shadow .18s;
+}
+
+.inp::placeholder {
+  color: var(--muted);
+}
+
+.inp:focus {
+  border-color: var(--tt);
+  box-shadow: 0 0 0 2px rgba(254, 44, 85, 0.12);
+}
+
+textarea.inp {
+  height: 76px;
+  line-height: 1.55;
+}
+
+.row2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.tog-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.tog-label {
+  font-size: 13px;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.tog-label i {
+  color: var(--text2);
+  font-size: 12px;
+}
+
+.tog {
+  width: 38px;
+  height: 21px;
+  border-radius: 11px;
+  background: var(--surface3);
+  border: 1px solid var(--border2);
+  position: relative;
+  cursor: pointer;
+  transition: background .2s;
+  flex-shrink: 0;
+}
+
+.tog.on {
+  background: var(--tt);
+  border-color: var(--tt);
+}
+
+.tog::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform .2s;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, .3);
+}
+
+.tog.on::after {
+  transform: translateX(17px);
+}
+
+.div {
+  height: 1px;
+  background: var(--border);
+}
+
+.btn-dl-main {
+  width: 100%;
+  padding: 11px;
+  background: linear-gradient(90deg, var(--tt), #ff6b35);
+  border: none;
+  border-radius: 9px;
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+  cursor: pointer;
+  transition: transform .14s, box-shadow .14s;
+  box-shadow: 0 4px 18px rgba(254, 44, 85, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-dl-main:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 26px rgba(254, 44, 85, 0.5);
+}
+
+.btn-dl-sec {
+  width: 100%;
+  padding: 9px;
+  border: 1px solid var(--border2);
+  border-radius: 9px;
+  background: transparent;
+  color: var(--text);
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all .18s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+}
+
+.btn-dl-sec:hover {
+  border-color: var(--tt2);
+  color: var(--tt2);
+}
+
+/* ==========================================================================
+   7. PREVIEW AREA & CANVASES
+   ========================================================================== */
+.preview-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 28px 24px;
+  gap: 18px;
+  overflow: auto;
+  position: relative;
+}
+
+.preview-area::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: linear-gradient(rgba(255, 255, 255, 0.018) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.018) 1px, transparent 1px);
+  background-size: 30px 30px;
+  pointer-events: none;
+}
+
+.preview-area::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 60% 30%, rgba(254, 44, 85, 0.05), transparent 55%), radial-gradient(ellipse at 20% 75%, rgba(37, 244, 238, 0.04), transparent 50%);
+  pointer-events: none;
+}
+
+body.light-mode .preview-area::before {
+  background-image: linear-gradient(rgba(0, 0, 0, 0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 0, 0, 0.04) 1px, transparent 1px);
+}
+
+body.light-mode .preview-area::after {
+  background: radial-gradient(ellipse at 60% 30%, rgba(254, 44, 85, 0.07), transparent 55%), radial-gradient(ellipse at 20% 75%, rgba(37, 244, 238, 0.06), transparent 50%);
+}
+
+.preview-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: 'IBM Plex Mono', monospace;
+  position: relative;
+  z-index: 1;
+}
+
+.preview-label::before, .preview-label::after {
+  content: '';
+  width: 30px;
+  height: 1px;
+  background: var(--border2);
+}
+
+#exportTarget {
+  position: relative;
+  z-index: 1;
+  display: inline-block;
+  max-width: 100%;
+}
+
+/* ==========================================================================
+   8. GENERATED SOCIAL MEDIA MOCKUPS
+   ========================================================================== */
+
+/* --- TikTok Bubble Style --- */
+.tt-wrap {
+  background: #0a0a12;
+  padding: 48px 36px 64px;
+  border-radius: 20px;
+  min-width: 320px;
+  max-width: 500px;
+  position: relative;
+}
+
+.tt-wrap.light {
+  background: #f0f0f5;
+}
+
+.tt-bubble {
+  background: #fff;
+  border-radius: 20px 20px 20px 6px;
+  padding: 20px 22px 22px;
+  position: relative;
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.4), 0 2px 8px rgba(0, 0, 0, 0.2);
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.tt-bubble::after {
+  content: '';
+  position: absolute;
+  bottom: -26px;
+  left: 24px;
+  width: 0;
+  height: 0;
+  border-left: 14px solid transparent;
+  border-right: 8px solid transparent;
+  border-top: 28px solid #fff;
+}
+
+.tt-av {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  background: #ddd;
+  border: 2.5px solid #f0f0f0;
+}
+
+.tt-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.tt-reply-label {
+  font-size: 14px;
+  font-weight: 400;
+  color: #888;
+  margin-bottom: 5px;
+  font-family: -apple-system, 'Segoe UI', sans-serif;
+}
+
+.tt-text {
+  font-size: 28px;
+  font-weight: 800;
+  line-height: 1.28;
+  color: #111;
+  font-family: -apple-system, 'Helvetica Neue', 'Segoe UI', sans-serif;
+  word-break: break-word;
+  white-space: pre-wrap;
+  letter-spacing: -0.3px;
+}
+
+.tt-user-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 8px;
+}
+
+.tt-user {
+  font-size: 13px;
+  color: #666;
+  font-family: -apple-system, sans-serif;
+}
+
+.tt-vtick {
+  color: #20d5ec;
+  font-size: 13px;
+  display: none;
+}
+
+.tt-vtick.show {
+  display: inline;
+}
+
+.tt-wrap.dark-bubble .tt-bubble { background: #1e1e2a; box-shadow: 0 12px 48px rgba(0,0,0,0.6); }
+.tt-wrap.dark-bubble .tt-bubble::after { border-top-color: #1e1e2a; }
+.tt-wrap.dark-bubble .tt-text { color: #ffffff; }
+.tt-wrap.dark-bubble .tt-reply-label { color: #777; }
+.tt-wrap.dark-bubble .tt-user { color: #999; }
+
+/* --- Facebook Layout --- */
+.fb-card {
+  background: #fff;
+  font-family: -apple-system, 'Segoe UI', sans-serif;
+  padding: 16px;
+  border-radius: 12px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+  min-width: 300px;
+  max-width: 480px;
+  width: 100%;
+}
+
+.fb-row {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.fb-av {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  background: #ddd;
+}
+
+.fb-right {
+  flex: 1;
+  min-width: 0;
+}
+
+.fb-bubble {
+  background: #f0f2f5;
+  border-radius: 18px;
+  padding: 9px 14px;
+  position: relative;
+}
+
+.fb-name-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 3px;
+}
+
+.fb-name {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #050505;
+}
+
+.fb-vtick {
+  font-size: 12px;
+  display: none;
+}
+
+.fb-vtick.show {
+  display: inline;
+  color: #1877f2;
+}
+
+.fb-text {
+  font-size: 14px;
+  color: #1c1e21;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.fb-react {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  background: #fff;
+  border-radius: 20px;
+  padding: 2px 8px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, .15);
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.fb-meta {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 6px;
+  padding-left: 4px;
+}
+
+.fb-meta span {
+  font-size: 12px;
+  font-weight: 700;
+  color: #65676b;
+  cursor: pointer;
+}
+
+.fb-meta .active {
+  color: #1877f2;
+}
+
+.fb-meta .t {
+  font-weight: 400 !important;
+}
+
+.fb-rep-wrap {
+  margin-top: 8px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.fb-rep-av {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #ddd;
+}
+
+.fb-rep-bub {
+  background: #f0f2f5;
+  border-radius: 18px;
+  padding: 7px 13px;
+  font-size: 13px;
+  color: #050505;
+  flex: 1;
+}
+
+/* --- YouTube Layout --- */
+.yt-card {
+  background: #fff;
+  font-family: 'Roboto', 'IBM Plex Sans', sans-serif;
+  padding: 16px 20px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+  min-width: 300px;
+  max-width: 560px;
+  width: 100%;
+}
+
+.yt-row {
+  display: flex;
+  gap: 14px;
+}
+
+.yt-av {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  background: #ddd;
+}
+
+.yt-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.yt-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 3px;
+}
+
+.yt-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: #0f0f0f;
+}
+
+.yt-vtick {
+  color: #aaa;
+  font-size: 12px;
+  display: none;
+}
+
+.yt-vtick.show {
+  display: inline;
+}
+
+.yt-time {
+  font-size: 12px;
+  color: #606060;
+}
+
+.yt-text {
+  font-size: 14px;
+  line-height: 1.55;
+  color: #0f0f0f;
+  white-space: pre-wrap;
+  word-break: break-word;
+  margin: 4px 0 10px;
+}
+
+.yt-acts {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.yt-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 8px;
+  border-radius: 20px;
+  font-size: 13px;
+  color: #606060;
+  cursor: pointer;
+  transition: background .14s;
+}
+
+.yt-btn:hover {
+  background: #f2f2f2;
+}
+
+.yt-btn.liked {
+  color: #0f0f0f;
+}
+
+.yt-rep {
+  margin-top: 12px;
+  padding: 10px;
+  background: #f9f9f9;
+  border-left: 3px solid #ddd;
+  font-size: 13px;
+  color: #0f0f0f;
+}
+
+/* --- Instagram Layout --- */
+.ig-card {
+  background: #fff;
+  font-family: -apple-system, 'Segoe UI', sans-serif;
+  padding: 14px 16px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+  min-width: 300px;
+  max-width: 480px;
+  width: 100%;
+}
+
+.ig-row {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.ig-av {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  background: #ddd;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  box-shadow: 0 0 0 2px #e1306c;
+}
+
+.ig-body {
+  flex: 1;
+}
+
+.ig-line {
+  font-size: 14px;
+  color: #262626;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.ig-un {
+  font-weight: 700;
+  margin-right: 5px;
+}
+
+.ig-vtick {
+  font-size: 11px;
+  display: none;
+  margin-right: 3px;
+}
+
+.ig-vtick.show {
+  display: inline;
+  color: #1877f2;
+}
+
+.ig-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.ig-time {
+  font-size: 12px;
+  color: #8e8e8e;
+}
+
+.ig-rep-btn {
+  font-size: 12px;
+  font-weight: 600;
+  color: #8e8e8e;
+  cursor: pointer;
+}
+
+.ig-heart {
+  color: #262626;
+  font-size: 14px;
+  cursor: pointer;
+  margin-left: auto;
+}
+
+.ig-heart.liked {
+  color: #ed4956;
+}
+
+.ig-rep {
+  margin-top: 8px;
+  font-size: 13px;
+  color: #8e8e8e;
+}
+
+.ig-rep strong {
+  color: #262626;
+  font-weight: 600;
+}
+
+/* --- Twitter/X Layout --- */
+.tw-card {
+  background: #fff;
+  font-family: -apple-system, 'Segoe UI', sans-serif;
+  padding: 14px 16px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+  border-bottom: 1px solid #eff3f4;
+  min-width: 300px;
+  max-width: 520px;
+  width: 100%;
+}
+
+.tw-row {
+  display: flex;
+  gap: 12px;
+}
+
+.tw-av {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  background: #ddd;
+}
+
+.tw-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.tw-top {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+  margin-bottom: 2px;
+}
+
+.tw-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: #0f1419;
+}
+
+.tw-vtick {
+  font-size: 14px;
+  display: none;
+}
+
+.tw-vtick.show {
+  display: inline;
+  color: #1d9bf0;
+}
+
+.tw-handle, .tw-dot, .tw-time {
+  font-size: 14px;
+  color: #536471;
+}
+
+.tw-text {
+  font-size: 15px;
+  line-height: 1.55;
+  color: #0f1419;
+  white-space: pre-wrap;
+  word-break: break-word;
+  margin: 4px 0 10px;
+}
+
+.tw-acts {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.tw-act {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 13px;
+  color: #536471;
+  cursor: pointer;
+  transition: color .14s;
+}
+
+.tw-act:hover {
+  color: #1d9bf0;
+}
+
+.tw-act.liked {
+  color: #f91880;
+}
+
+.tw-act.rt:hover {
+  color: #00ba7c;
+}
+
+.tw-act i {
+  font-size: 16px;
+}
+
+.tw-rep {
+  margin-top: 10px;
+  padding: 10px 14px;
+  border: 1px solid #eff3f4;
+  border-radius: 12px;
+  font-size: 13px;
+  color: #536471;
+}
+
+/* ==========================================================================
+   9. POPUPS & NOTIFICATIONS (TOAST, OVERLAY)
+   ========================================================================== */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(16px);
+  background: #1a1a22;
+  border: 1px solid var(--border2);
+  color: #fff;
+  padding: 10px 18px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 500;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, .4);
+  opacity: 0;
+  pointer-events: none;
+  transition: all .28s cubic-bezier(.34, 1.56, .64, 1);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.toast i {
+  color: var(--tt2);
+}
+
+.overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(0, 0, 0, .7);
+  backdrop-filter: blur(4px);
+}
+
+.overlay.open {
+  display: block;
+}
+
+/* ==========================================================================
+   10. RESPONSIVE MEDIA QUERIES (MOBILE OPTIMIZATION)
+   ========================================================================== */
+@media (max-width: 768px) {
+  nav {
+    display: none;
+  }
+  
+  .menu-btn {
+    display: flex;
+  }
+  
+  .ptabs {
+    padding: 0 12px;
+  }
+  
+  .ptab {
+    padding: 11px 14px;
+  }
+  
+  .layout {
+    flex-direction: column;
+    height: auto;
+    min-height: calc(100vh - 54px - 44px);
+  }
+  
+  .sidebar {
+    position: fixed;
+    left: 0;
+    top: 98px;
+    height: calc(100vh - 98px);
+    z-index: 300;
+    transform: translateX(-110%);
+    width: min(var(--sidebar-w), 92vw);
+    box-shadow: 4px 0 32px rgba(0, 0, 0, .5);
+  }
+  
+  .sidebar.open {
+    transform: translateX(0);
+  }
+  
+  .preview-area {
+    padding: 20px 14px;
+    min-height: 60vh;
+  }
+  
+  .tt-wrap {
+    padding: 32px 20px 52px;
+    min-width: 0;
+    width: 100%;
+  }
+  
+  .tt-text {
+    font-size: 20px;
+  }
+}
